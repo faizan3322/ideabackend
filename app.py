@@ -60,3 +60,16 @@ def submit_form():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
+@app.route('/get-contacts', methods=['GET'])
+
+
+def get_contacts():
+    try:
+        contacts = Contact.query.all()
+        contact_list = [
+            {"id": contact.id, "name": contact.name, "email": contact.email, "message": contact.message}
+            for contact in contacts
+        ]
+        return jsonify(contact_list), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
