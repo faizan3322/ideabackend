@@ -1,15 +1,17 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+import os
 
 # Initialize Flask app
 app = Flask(__name__)
 
-# Enable CORS with explicit settings
-CORS(app, resources={r"/submit-form": {"origins": "http://localhost:5173"}})
+# Enable CORS (Allow all origins for production)
+CORS(app)
 
-# Configure SQLite Database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+# Configure SQLite Database (or use an environment variable for PostgreSQL)
+DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///database.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize Database
@@ -51,8 +53,10 @@ def submit_form():
         return jsonify({"message": "Form submitted successfully!"}), 201
     
     except Exception as e:
-        print(f"Error: {e}")  # Print error in Flask console
+        print(f"Error: {e}")  # Log error in Flask console
         return jsonify({"error": "Internal Server Error"}), 500
 
+# Run the app (Deployment-friendly)
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
